@@ -7,7 +7,7 @@ plugins {
 	maven
 }
 
-group = "kt.nio"
+group = "com.github.lesa1127"
 version = "0.0.1-SNAPSHOT"
 
 dependencies {
