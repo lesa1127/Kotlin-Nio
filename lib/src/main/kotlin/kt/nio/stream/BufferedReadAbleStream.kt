@@ -36,6 +36,7 @@ open class BufferedReadAbleStream(override val readAbleStream: ReadAbleStream, b
         position(0)
         limit(0)
     }
+    private val MAX_SKIP_BUFFER_SIZE=2048L
 
     override val isClosed: Boolean
         get() = closeStatus
@@ -122,5 +123,26 @@ open class BufferedReadAbleStream(override val readAbleStream: ReadAbleStream, b
 
     override fun reset() {
         byteBuff.reset()
+    }
+
+    override suspend fun skip(n: Long): Long {
+        var remaining = n
+        var nr: Int
+
+        if (n <= 0) {
+            return 0
+        }
+
+        val size = min(MAX_SKIP_BUFFER_SIZE, remaining).toInt()
+        val skipBuffer = ByteArray(size)
+        while (remaining > 0) {
+            nr = read(skipBuffer, 0, min(size.toLong(), remaining).toInt())
+            if (nr < 0) {
+                break
+            }
+            remaining -= nr.toLong()
+        }
+
+        return n - remaining
     }
 }

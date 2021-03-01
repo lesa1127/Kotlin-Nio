@@ -79,7 +79,7 @@ allprojects {
 
 ```groovy
 dependencies {
-    implementation 'com.github.lesa1127:Kotlin-Nio:0.0.2'
+    implementation 'com.github.lesa1127:Kotlin-Nio:0.0.3'
 }
 ```
 
