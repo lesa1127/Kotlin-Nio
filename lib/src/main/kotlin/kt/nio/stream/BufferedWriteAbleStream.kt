@@ -73,6 +73,7 @@ open class BufferedWriteAbleStream(override val writeAbleStream: WriteAbleStream
             }
         }
         byteBuff.clear()
+        super.flush()
     }
 
     override fun close() {

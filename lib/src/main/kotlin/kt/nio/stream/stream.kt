@@ -362,3 +362,15 @@ fun ReadAbleStream.bufferedReadAbleStream(buffSize:Int=4096):BufferedReadAbleStr
 fun WriteAbleStream.bufferedWriteAbleStream(buffSize: Int=4096):BufferedWriteAbleStream{
     return BufferedWriteAbleStream(this,buffSize)
 }
+
+fun ByteArray.toByteArrayReadAbleStream(offset: Int=0,len: Int=this.size-offset):ByteArrayReadAbleStream{
+    return ByteArrayReadAbleStream(this,offset,len)
+}
+
+fun ReadAbleStream.toDataInputStream(): DataInputStream {
+    return DataInputStream(this)
+}
+
+fun WriteAbleStream.toDataOutPutStream():DataOutputStream{
+    return DataOutputStream(this)
+}
