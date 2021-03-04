@@ -3,6 +3,7 @@ package kt.nio.stream
 import kt.nio.checkClosed
 import kt.nio.util.checkRange
 import kt.nio.whenNotClosed
+import java.io.IOException
 import java.nio.ByteBuffer
 import kotlin.math.min
 
@@ -37,7 +38,7 @@ open class BufferedWriteAbleStream(override val writeAbleStream: WriteAbleStream
         }
     }
 
-    override suspend fun write(buff: ByteArray, offset: Int, length: Int): Int {
+    private suspend fun writeBuff(buff: ByteArray, offset: Int, length: Int): Int {
         checkClosed("Stream Closed!")
 
         buff.checkRange(offset,length)
@@ -54,23 +55,26 @@ open class BufferedWriteAbleStream(override val writeAbleStream: WriteAbleStream
         return 0
     }
 
-    override suspend fun writeFully(byteArray: ByteArray, off: Int, len: Int) {
-        writeBytes(byteArray,off,len)
+    override suspend fun write(buff: ByteArray, off: Int, len: Int) {
+        buff.checkRange(off,len)
+        var _offset=off
+        var length=len
+        while (length>0) {
+            val writeLen = writeBuff(buff, _offset, length)
+            if (writeLen>=0) {
+                _offset += writeLen
+                length -= writeLen
+            }else{
+                throw IOException("Stream has be closed")
+            }
+        }
     }
 
     override suspend fun flush() {
         checkClosed("Stream Closed!")
-
         byteBuff.flip()
-        while (byteBuff.hasRemaining()){
-            checkClosed("Stream Closed!")
-
-            val len=writeAbleStream.write(byteArrayBuff,byteBuff.position(),byteBuff.remaining())
-            if(len >=0){
-                byteBuff.position(byteBuff.position()+len)
-            }else{
-                close()
-            }
+        if (byteBuff.hasRemaining()) {
+            writeAbleStream.write(byteArrayBuff, byteBuff.position(), byteBuff.remaining())
         }
         byteBuff.clear()
         super.flush()

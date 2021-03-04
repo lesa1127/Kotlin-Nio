@@ -17,16 +17,7 @@ open class DataOutputStream(writeAbleStream: WriteAbleStream) :FilterWriteAbleSt
     override suspend fun writeFully(b: ByteArray, off: Int, len: Int) {
         
         b.checkRange(off,len)
-        
-        var offset=off
-        var length=len
-        while (length>0){
-            val readLen= super.write(b,offset,length)
-            if (readLen<0)
-                throw IOException("Stream has be closed!")
-            offset+=readLen
-            length-=readLen
-        }
+        super.write(b,off,len)
     }
 
     override suspend fun writeBoolean(v: Boolean) {

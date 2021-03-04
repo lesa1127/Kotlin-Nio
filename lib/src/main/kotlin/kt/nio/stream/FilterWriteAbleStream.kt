@@ -6,7 +6,7 @@ open class FilterWriteAbleStream(
         writeAbleStream.write(byte)
     }
 
-    override suspend fun write(buff: ByteArray, offset: Int, length: Int): Int {
+    override suspend fun write(buff: ByteArray, offset: Int, length: Int) {
         return writeAbleStream.write(buff, offset, length)
     }
 
@@ -21,7 +21,5 @@ open class FilterWriteAbleStream(
         writeAbleStream.flush()
     }
 
-    override suspend fun writeFully(byteArray: ByteArray, off: Int, len: Int) {
-        writeAbleStream.writeFully(byteArray, off, len)
-    }
+
 }

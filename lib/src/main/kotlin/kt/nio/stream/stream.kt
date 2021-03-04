@@ -162,31 +162,6 @@ interface WriteAbleStream: CloseAble,FlushAble{
      * <code>b</code>, then an <code>IndexOutOfBoundsException</code>
      * is thrown.  If <code>len</code> is zero,
      * then no bytes are written. Otherwise, the
-     * byte <code>b[buff]</code> is written first,
-     * then <code>b[off+1]</code>, and so on; the
-     * last byte written is <code>b[off+len-1]</code>.
-     *
-     * @param      buff     the data.
-     * @param      offset   the start offset in the data.
-     * @param      length   the number of bytes to write.
-     * @return     the total number of bytes write into the buffer, or
-     *             <code>-1</code> if there is no more data because the end of
-     *             the stream has been send.
-     * @throws     IOException  if an I/O error occurs.
-     */
-    suspend fun write(buff: ByteArray, offset: Int=0, length: Int=buff.size-offset):Int
-
-    /**
-     * Writes <code>len</code> bytes from array
-     * <code>b</code>, in order,  to
-     * the output stream.  If <code>b</code>
-     * is <code>null</code>, a <code>NullPointerException</code>
-     * is thrown.  If <code>off</code> is negative,
-     * or <code>len</code> is negative, or <code>off+len</code>
-     * is greater than the length of the array
-     * <code>b</code>, then an <code>IndexOutOfBoundsException</code>
-     * is thrown.  If <code>len</code> is zero,
-     * then no bytes are written. Otherwise, the
      * byte <code>b[off]</code> is written first,
      * then <code>b[off+1]</code>, and so on; the
      * last byte written is <code>b[off+len-1]</code>.
@@ -196,22 +171,9 @@ interface WriteAbleStream: CloseAble,FlushAble{
      * @param      len   the number of bytes to write.
      * @throws     IOException  if an I/O error occurs.
      */
-    suspend fun writeFully(byteArray: ByteArray, off: Int=0, len: Int = byteArray.size-off)
-}
+    suspend fun write(buff: ByteArray, offset: Int=0, length: Int=buff.size-offset)
 
-suspend fun WriteAbleStream.writeBytes(byteArray: ByteArray, off: Int=0, len: Int = byteArray.size-off){
-    byteArray.checkRange(off,len)
-    var offset=off
-    var length=len
-    while (length>0) {
-        val writeLen = write(byteArray, offset, length)
-        if (writeLen>=0) {
-            offset += writeLen
-            length -= writeLen
-        }else{
-            throw IOException("Stream has be closed")
-        }
-    }
+
 }
 
 abstract class AbsReadAbleStream(val readAble: ReadAble):ReadAbleStream{
@@ -321,17 +283,16 @@ abstract class AbsWriteAbleStream( val writeAble: WriteAble):WriteAbleStream{
         }
     }
 
-    override suspend fun write(buff: ByteArray, offset: Int, length: Int): Int {
+    override suspend fun write(buff: ByteArray, offset: Int, length: Int) {
         checkClosed("Stream Closed!")
 
         buff.checkRange(offset, length)
 
         val byteBuffer=ByteBuffer.wrap(buff,offset, length)
-        return writeAble.write(byteBuffer)
-    }
-
-    override suspend fun writeFully(byteArray: ByteArray, off: Int, len: Int) {
-        writeBytes(byteArray,off,len)
+        while (byteBuffer.hasRemaining()) {
+            writeAble.write(byteBuffer)
+        }
+        return
     }
 
     override suspend fun flush() {

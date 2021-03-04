@@ -63,18 +63,14 @@ open class ByteArrayWriteAbleStream(size:Int=32) :WriteAbleStream {
         count += 1
     }
 
-    override suspend fun write(buff: ByteArray, offset: Int, length: Int): Int {
+    override suspend fun write(buff: ByteArray, offset: Int, length: Int) {
         checkClosed("Stream Has be Closed!")
         buff.checkRange(offset,length)
         ensureCapacity(count + length)
         System.arraycopy(buff, offset, buf, count, length)
         count += length
-        return length
     }
 
-    override suspend fun writeFully(byteArray: ByteArray, off: Int, len: Int) {
-        writeBytes(byteArray, off, len)
-    }
 
     override val isClosed: Boolean
         get() = closeStatus
@@ -84,7 +80,7 @@ open class ByteArrayWriteAbleStream(size:Int=32) :WriteAbleStream {
     }
 
     suspend fun writeTo(out:WriteAbleStream){
-        out.writeBytes(buf,0,count)
+        out.write(buf,0,count)
     }
 
 
