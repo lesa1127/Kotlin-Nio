@@ -1,8 +1,7 @@
 package com.example.demo.tests
 
 import kotlinx.coroutines.*
-import kt.nio.launchIOScope
-import kt.nio.runBlockingIOScope
+import kt.nio.NioDispatcher
 import kt.nio.singlethread.select.CoroutineSelector
 import kt.nio.singlethread.select.bindAccept
 import kt.nio.singlethread.select.bindRead
@@ -19,7 +18,7 @@ import java.util.concurrent.Executors
 import kotlin.collections.HashSet
 
 fun main(){
-    runBlockingIOScope{
+    runBlocking(NioDispatcher.IO){
 
         val connectPool= Array(
             (Runtime.getRuntime().availableProcessors()/2)
@@ -29,7 +28,7 @@ fun main(){
         }
 
 
-        launchIOScope {
+        launch(currentCoroutineContext()) {
             while (true){
                 for (i in connectPool){
                     i.gcConnection()

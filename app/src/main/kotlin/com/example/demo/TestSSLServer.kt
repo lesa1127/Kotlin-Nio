@@ -1,6 +1,8 @@
 package com.example.demo.testssls
 
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kt.nio.*
 import kt.nio.singlethread.select.*
 import kt.nio.ssl.SSLSocketChannel
@@ -13,7 +15,7 @@ import java.security.SecureRandom
 import javax.net.ssl.SSLContext
 
 
-fun main()= runBlockingIOScope {
+fun main()= runBlocking(NioDispatcher.IO) {
     //获取ssl 用秘钥
     val sslContext = SSLContext.getInstance("TLSv1.3")
 
@@ -43,7 +45,7 @@ fun main()= runBlockingIOScope {
 }
 
 fun runIt(sslSocketChannel: SSLSocketChannel){
-    GlobalScope.launchIOScope {
+    GlobalScope.launch(NioDispatcher.IO) {
         try {
             sslSocketChannel.beginHandshake()
             val buff=ByteBuffer.allocate(4096)

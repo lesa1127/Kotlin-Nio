@@ -2,7 +2,6 @@ package kt.nio.stream.ByteArrayWriteAbleStream
 
 import kotlinx.coroutines.runBlocking
 import kt.nio.stream.ByteArrayWriteAbleStream
-import kt.nio.stream.writeBytes
 import org.junit.Test
 import java.util.Arrays
 import kotlin.Exception
@@ -43,7 +42,7 @@ class Write {
             )
         }
         try {
-            baos.writeBytes(b!!)
+            baos.write(b!!)
         } catch (e: NullPointerException) {
             println("NullPointerException is thrown: OKAY")
         } catch (e: Throwable) {
@@ -102,7 +101,7 @@ class Write {
                 Arrays.copyOfRange(b2, len1, len1 + len2),
                 Arrays.copyOfRange(b, off2, off2 + len2)
             )
-            baos.writeBytes(b)
+            baos.write(b)
             val b3 = baos.toByteArray()
             val len3 = len1 + len2 + b.size
             if (b3.size != len1 + len2 + b.size) {

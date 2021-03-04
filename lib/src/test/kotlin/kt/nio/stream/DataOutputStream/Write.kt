@@ -3,7 +3,6 @@ package kt.nio.stream.DataOutputStream
 import kotlinx.coroutines.runBlocking
 import kt.nio.stream.ByteArrayWriteAbleStream
 import kt.nio.stream.DataOutputStream
-import kt.nio.stream.writeBytes
 import org.junit.Assert
 import org.junit.Test
 
@@ -23,11 +22,11 @@ class Write {
             Assert.assertEquals(byteArrayWriteAbleStream.toByteArray()[0],5 .toByte())
 
             byteArrayWriteAbleStream.reset()
-            dataOutputStream.writeChar(5 .toChar())
+            dataOutputStream.writeChar(5 )
             Assert.assertEquals(byteArrayWriteAbleStream.toByteArray()[1],5 .toByte())
 
             byteArrayWriteAbleStream.reset()
-            dataOutputStream.writeShort(0xFF .toShort())
+            dataOutputStream.writeShort(0xFF )
             Assert.assertEquals(byteArrayWriteAbleStream.toByteArray()[1],0xFF .toByte())
 
             byteArrayWriteAbleStream.reset()

@@ -2,6 +2,8 @@ package com.example.demo
 
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kt.nio.*
 import kt.nio.singlethread.select.*
 import kt.nio.stream.buildReadAbleStream
@@ -11,7 +13,7 @@ import java.nio.channels.ServerSocketChannel
 import java.nio.channels.SocketChannel
 
 fun main(){
-    runBlockingIOScope {
+    runBlocking(NioDispatcher.IO) {
 
         val server= ServerSocketChannel.open()
         server.configureBlocking(false)
@@ -32,7 +34,7 @@ fun main(){
 
 
 fun read(client: SocketChannel){
-    GlobalScope.launchIOScope {
+    GlobalScope.launch(NioDispatcher.IO) {
         val reader= client.bindRead().buildReadAbleStream()
         try {
             while (true) {
@@ -50,7 +52,7 @@ fun read(client: SocketChannel){
 }
 
 fun write(client: SocketChannel ){
-    GlobalScope.launchIOScope {
+    GlobalScope.launch(NioDispatcher.IO) {
         val writer=client.bindWrite().buildWriteAbleStream()
         try {
             while (true) {

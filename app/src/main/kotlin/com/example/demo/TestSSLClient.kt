@@ -14,7 +14,7 @@ import java.security.SecureRandom
 import javax.net.ssl.SSLContext
 
 
-fun main()= runBlockingIOScope {
+fun main()= runBlocking(NioDispatcher.IO) {
 
     //加载秘钥
     val sslContext = SSLContext.getInstance("TLSv1.3")

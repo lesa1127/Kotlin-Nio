@@ -1,14 +1,14 @@
 package com.example.demo
 
-import kt.nio.runBlockingIOScope
+import kotlinx.coroutines.runBlocking
+import kt.nio.NioDispatcher
 import kt.nio.singlethread.select.*
 import kt.nio.stream.buildReadAbleStream
 import kt.nio.stream.buildWriteAbleStream
-import kt.nio.stream.writeBytes
 import java.net.InetSocketAddress
 import java.nio.channels.SocketChannel
 
-fun main()= runBlockingIOScope {
+fun main()= runBlocking(NioDispatcher.IO) {
 
 
     val socketChannel=SocketChannel.open()
@@ -22,7 +22,7 @@ fun main()= runBlockingIOScope {
         val buff=ByteArray(1024)
         val len=reader.read(buff)
         System.out.write(buff,0,len)
-        wirter.writeBytes("ok\n".toByteArray())
+        wirter.write("ok\n".toByteArray())
     }
 
 }

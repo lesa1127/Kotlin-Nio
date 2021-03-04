@@ -1,7 +1,6 @@
 package kt.nio.stream
 
 import kt.nio.util.checkRange
-import java.io.IOException
 import java.io.UTFDataFormatException
 
 open class DataOutputStream(writeAbleStream: WriteAbleStream) :FilterWriteAbleStream(writeAbleStream),DataOutput {
@@ -10,11 +9,11 @@ open class DataOutputStream(writeAbleStream: WriteAbleStream) :FilterWriteAbleSt
         super.write(byte)
     }
 
-    override suspend fun writeFully(b: ByteArray) {
-        writeFully(b,0,b.size)
+    override suspend fun write(b: ByteArray) {
+        write(b,0,b.size)
     }
 
-    override suspend fun writeFully(b: ByteArray, off: Int, len: Int) {
+    override suspend fun write(b: ByteArray, off: Int, len: Int) {
         
         b.checkRange(off,len)
         super.write(b,off,len)
@@ -24,19 +23,19 @@ open class DataOutputStream(writeAbleStream: WriteAbleStream) :FilterWriteAbleSt
         write(if (v) 1 else 0)
     }
 
-    override suspend fun writeByte(v: Byte) {
-        write(v.toInt())
+    override suspend fun writeByte(v: Int) {
+        write(v)
     }
 
-    override suspend fun writeShort(s: Short) {
-        val v = s.toInt()
+    override suspend fun writeShort(s: Int) {
+        val v = s
         write(v ushr 8 and 0xFF)
         write(v ushr 0 and 0xFF)
     }
     
 
-    override suspend fun writeChar(c: Char) {
-        val v=c.toInt()
+    override suspend fun writeChar(c: Int) {
+        val v= c
         write(v ushr 8 and 0xFF)
         write(v ushr 0 and 0xFF)
     }
@@ -59,7 +58,7 @@ open class DataOutputStream(writeAbleStream: WriteAbleStream) :FilterWriteAbleSt
         writeBuffer[5] = (v ushr 16).toByte()
         writeBuffer[6] = (v ushr 8).toByte()
         writeBuffer[7] = (v ushr 0).toByte()
-        writeFully(writeBuffer, 0, 8)
+        write(writeBuffer, 0, 8)
     }
 
     override suspend fun writeFloat(v: Float) {
@@ -137,6 +136,6 @@ open class DataOutputStream(writeAbleStream: WriteAbleStream) :FilterWriteAbleSt
             }
             i++
         }
-        writeFully(bytearr, 0, utflen + 2)
+        write(bytearr, 0, utflen + 2)
     }
 }

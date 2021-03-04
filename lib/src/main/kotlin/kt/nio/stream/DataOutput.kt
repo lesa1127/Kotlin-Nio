@@ -29,7 +29,7 @@ interface DataOutput {
      * @param      b   the data.
      * @throws     IOException  if an I/O error occurs.
      */
-    suspend fun writeFully(b: ByteArray)
+    suspend fun write(b: ByteArray)
 
     /**
      * Writes <code>len</code> bytes from array
@@ -51,7 +51,7 @@ interface DataOutput {
      * @param      len   the number of bytes to write.
      * @throws     IOException  if an I/O error occurs.
      */
-    suspend fun writeFully(b: ByteArray, off: Int, len: Int)
+    suspend fun write(b: ByteArray, off: Int, len: Int)
 
     /**
      * Writes a <code>boolean</code> value to this output stream.
@@ -85,7 +85,7 @@ interface DataOutput {
      * @param      v   the byte value to be written.
      * @throws     IOException  if an I/O error occurs.
      */
-    suspend fun writeByte(v: Byte)
+    suspend fun writeByte(v: Int)
 
     /**
      * Writes two bytes to the output
@@ -105,7 +105,7 @@ interface DataOutput {
      * @param      v   the <code>short</code> value to be written.
      * @throws     IOException  if an I/O error occurs.
      */
-    suspend fun writeShort(v: Short)
+    suspend fun writeShort(v: Int)
 
     /**
      * Writes a <code>char</code> value, which
@@ -126,7 +126,7 @@ interface DataOutput {
      * @param      v   the <code>char</code> value to be written.
      * @throws     IOException  if an I/O error occurs.
      */
-    suspend fun writeChar(v: Char)
+    suspend fun writeChar(v: Int)
 
     /**
      * Writes an <code>int</code> value, which is

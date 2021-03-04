@@ -55,15 +55,15 @@ open class BufferedWriteAbleStream(override val writeAbleStream: WriteAbleStream
         return 0
     }
 
-    override suspend fun write(buff: ByteArray, off: Int, len: Int) {
-        buff.checkRange(off,len)
-        var _offset=off
-        var length=len
-        while (length>0) {
-            val writeLen = writeBuff(buff, _offset, length)
+    override suspend fun write(buff: ByteArray, offset: Int, length: Int) {
+        buff.checkRange(offset,length)
+        var _offset=offset
+        var _length=length
+        while (_length>0) {
+            val writeLen = writeBuff(buff, _offset, _length)
             if (writeLen>=0) {
                 _offset += writeLen
-                length -= writeLen
+                _length -= writeLen
             }else{
                 throw IOException("Stream has be closed")
             }

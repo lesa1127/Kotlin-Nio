@@ -3,7 +3,6 @@ package kt.nio.stream.BufferedWriteAbleStream
 import kotlinx.coroutines.runBlocking
 import kt.nio.stream.BufferedWriteAbleStream
 import kt.nio.stream.ByteArrayWriteAbleStream
-import kt.nio.stream.writeBytes
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -25,7 +24,7 @@ class Write {
             assertEquals("num error",tmp[2].toInt(),3)
 
             baws.reset()
-            bufferedWriteAbleStream.writeBytes(ByteArray(8))
+            bufferedWriteAbleStream.write(ByteArray(8))
             bufferedWriteAbleStream.flush()
             tmp =baws.toByteArray()
             assertEquals("length check error",tmp.size,8)
