@@ -12,11 +12,21 @@ import kotlin.coroutines.CoroutineContext
 
 interface CoroutineSelectAble: BaseSelectAble {
     var interruptTime:Long
+    var waitTime:Long
+    var delayTime:Long
+    var maxDelay:Long
 }
 
 
 abstract class AbsCoroutineSelectAble :CoroutineSelectAble{
     override var interruptTime: Long = System.currentTimeMillis()
+
+    override var waitTime: Long=500
+
+    override var delayTime: Long=1
+
+    override var maxDelay: Long=500
+
     protected var closeStatus=false
     override val isClosed: Boolean
         get() = closeStatus || !channel.isOpen
@@ -32,11 +42,6 @@ abstract class AbsCoroutineSelectAble :CoroutineSelectAble{
 }
 
 
-abstract class AbsCoroutineSelector: BaseSelector{
-    var waitTime=500L
-    var delayTime=1L
-}
-
 /**
  * @param selector             A multiplexor of {@link SelectableChannel} objects.
  * @param coroutineDispatcher  only the CoroutineDispatcher can to select the selector
@@ -44,10 +49,9 @@ abstract class AbsCoroutineSelector: BaseSelector{
 open class CoroutineSelector(
     override val selector: Selector = Selector.open(),
     private var coroutineDispatcher: CoroutineDispatcher?=null
-) : AbsCoroutineSelector(){
+) : BaseSelector{
     private var exit = false
 
-    var seleable=true
     override suspend fun select(selectAble: BaseSelectAble) {
         if (coroutineDispatcher==null){
             coroutineDispatcher=currentCoroutineContext().coroutineDispatcher
@@ -58,6 +62,8 @@ open class CoroutineSelector(
         }
         selectAble as CoroutineSelectAble
         selectAble.interruptTime=System.currentTimeMillis()
+        selectAble.selectionKey.interestOps(selectAble.selectionKey.interestOps() or  selectAble.ops)
+        var sleepTime=selectAble.delayTime
         var wait=false
         while (!exit){
             if (selectAble.isClosed)
@@ -68,35 +74,36 @@ open class CoroutineSelector(
                 if (selectAble.selectionKey.isValid)
                     break
             }
-            if (seleable) {
-                selector.selectNow()
-                set = selector.selectedKeys()
-                if (set.contains(selectAble.selectionKey)) {
-                    set.remove(selectAble.selectionKey)
-                    if (selectAble.selectionKey.isValid)
-                        break
-                }
+            selector.selectNow()
+            set = selector.selectedKeys()
+            if (set.contains(selectAble.selectionKey)) {
+                set.remove(selectAble.selectionKey)
+                if (selectAble.selectionKey.isValid)
+                    break
             }
             wait=true
-            if (delayTime>0) {
-                if (System.currentTimeMillis() - selectAble.interruptTime < waitTime) {
+            if (selectAble.delayTime>0) {
+                if (System.currentTimeMillis() - selectAble.interruptTime < selectAble.waitTime) {
                     yield()
                 } else {
-                    delay(delayTime)
+                    delay(sleepTime)
+                    if (sleepTime<selectAble.maxDelay) {
+                        sleepTime++
+                    }
                 }
             }else{
                 yield()
             }
         }
-        seleable=false
         if (!wait){
             yield()
         }
-        seleable=true
 
         if (exit){
             throw ClosedSelectorException()
         }
+
+        selectAble.selectionKey.interestOps(selectAble.selectionKey.interestOps() and selectAble.ops.inv())
     }
 
     override fun close() {
@@ -156,6 +163,9 @@ fun baseSelectHolder(baseSelector: CoroutineSelector,channel:SelectableChannel,o
         override val selectionKey: SelectionKey=channel.register(baseSelector.selector,ops)
         override val ops: Int = ops
         override val selector: BaseSelector=baseSelector
+        init {
+            selectionKey.interestOps(selectionKey.interestOps() and  ops.inv())
+        }
     }
 }
 
@@ -176,6 +186,7 @@ interface BaseSelectReadWriteAble:ReadWriteAble{
 
 fun ServerSocketChannel.bindAccept(baseSelector: CoroutineSelector): CoroutineSelectAcceptAble {
     val selectAble = baseSelectHolder(baseSelector,this,SelectionKey.OP_ACCEPT)
+    selectAble.maxDelay=2
     return object :CoroutineSelectAcceptAble ,CoroutineSelectAble by selectAble{
         override suspend fun accept(): SocketChannel {
             checkClosed("ClosedChannelException")
@@ -199,6 +210,7 @@ fun SelectableChannel.bindRead(baseSelector: CoroutineSelector): CoroutineSelect
         throw IllegalAccessException("type no was ReadableByteChannel!")
     }
     val selectAble =baseSelectHolder(baseSelector,this,SelectionKey.OP_READ)
+    selectAble.waitTime=100
     return object :CoroutineSelectReadAble ,CoroutineSelectAble by selectAble{
         override suspend fun read(buff: ByteBuffer): Int {
             checkClosed("ClosedChannelException")
@@ -212,6 +224,7 @@ fun SelectableChannel.bindWrite(baseSelector: CoroutineSelector): CoroutineSelec
         throw IllegalAccessException("type no was WritableByteChannel!")
     }
     val selectAble = baseSelectHolder(baseSelector,this,SelectionKey.OP_WRITE)
+    selectAble.waitTime=100
     return object :CoroutineSelectWriteAble ,CoroutineSelectAble by selectAble{
         override suspend fun write(buff: ByteBuffer): Int {
             checkClosed("ClosedChannelException")

@@ -12,10 +12,10 @@
 
 ```kotlin
 fun main(){
-    runBlockingIOScope  {
+    runBlocking (NioDispatcher.IO) {
         val server= ServerSocketChannel.open()
         server.configureBlocking(false)
-        server.bind( InetSocketAddress(80))
+        server.bind( InetSocketAddress(8881))
         val serverHandle=server.bindAccept()
         while (true){
             try {
@@ -34,7 +34,7 @@ fun main(){
 fun read(readAble: ReadAbleStream,writeAble: WriteAbleStream){
     val lineReader=LineReader(readAble.bufferedReadAbleStream())
     val out = writeAble.bufferedWriteAbleStream()
-    GlobalScope.launchIOScope {
+    GlobalScope.launch(NioDispatcher.IO) {
         try {
             var txt=""
             while (true) {
@@ -42,15 +42,15 @@ fun read(readAble: ReadAbleStream,writeAble: WriteAbleStream){
                 if (txt==""){
                     break
                 }
-                println("Content:$txt")
+                println("内容:$txt")
             }
 
-            out.writeFully("HTTP/1.1 200 OK\r\n".toByteArray())
-            out.writeFully("Content-type:text/html\r\n".toByteArray())
+            out.write("HTTP/1.1 200 OK\r\n".toByteArray())
+            out.write("Content-type:text/html\r\n".toByteArray())
 
-            out.writeFully("\r\n".toByteArray())
+            out.write("\r\n".toByteArray())
 
-            out.writeFully("<h1>successful</h1>\r\n".toByteArray())
+            out.write("<h1>successful</h1>\r\n".toByteArray())
             out.flush()
 
         }catch (t:Throwable){
@@ -58,6 +58,7 @@ fun read(readAble: ReadAbleStream,writeAble: WriteAbleStream){
         } finally {
             readAble.close()
             writeAble.close()
+            System.err.println("退出读取!")
         }
     }
 }
@@ -79,7 +80,7 @@ allprojects {
 
 ```groovy
 dependencies {
-    implementation 'com.github.lesa1127:Kotlin-Nio:0.0.5'
+    implementation 'com.github.lesa1127:Kotlin-Nio:0.0.7'
 }
 ```
 

@@ -1,5 +1,9 @@
 package kt.nio.util
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.Closeable
@@ -44,13 +48,15 @@ fun ByteBuffer.enlargeBuffer(size:Int):ByteBuffer{
     }
 }
 
-inline fun Closeable.useInTime(timeOut:Int, timer: Timer=Timer.getTimer(), block:()->Unit){
-    val task = timer.schedule(System.currentTimeMillis()+timeOut){
+suspend fun Closeable.useInTime(timeOut:Int, block:suspend ()->Unit){
+    val context=currentCoroutineContext()
+    val job=GlobalScope.launch(context) {
+        delay(timeOut.toLong())
         close()
     }
     try {
         block()
     }finally {
-        task.cancle()
+        job.cancel()
     }
 }

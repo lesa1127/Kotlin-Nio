@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.github.lesa1127"
-version = "0.0.5-SNAPSHOT"
+version = "0.0.7-SNAPSHOT"
 
 dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.20")
