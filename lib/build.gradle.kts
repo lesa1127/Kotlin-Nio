@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.github.lesa1127"
-version = "0.0.7-SNAPSHOT"
+version = "0.0.8-SNAPSHOT"
 
 dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.20")
@@ -26,12 +26,13 @@ tasks.withType<Test> {
 	useJUnitPlatform()
 }
 
-java.sourceCompatibility = JavaVersion.VERSION_11
+java.sourceCompatibility = JavaVersion.VERSION_1_8
+java.targetCompatibility = JavaVersion.VERSION_1_8
 
 tasks.withType<KotlinCompile> {
 	kotlinOptions {
 		freeCompilerArgs = listOf("-Xjsr305=strict")
-		jvmTarget = "11"
+		jvmTarget = "1.8"
 	}
 }
 tasks.withType<JavaCompile>{
